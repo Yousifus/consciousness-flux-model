@@ -1,0 +1,26 @@
+symbol,meaning,units,role,prior_lower,prior_upper,default,notes
+P_t,Population,persons,Demand,,,,Observed time series
+cH_dot,Per-human annual cadence (baseline consumption),CCU/(person·yr),Demand,1.0,1.0,1.0,Normalization sets scale
+e_max_post,Max sharing efficiency (post-1990),fraction,Demand,0.1,0.8,0.5,Hill cap after 1990
+e_max_pre,Max sharing efficiency (pre-1990),fraction,Demand,0.01,0.4,0.15,Hill cap before 1990
+K,Connectivity half-saturation,index-units,Demand,0.3,3.0,1.0,Set near median of L
+n,Hill steepness,-,Demand,1.0,3.0,2.0,Steeper > faster transition
+alpha,Emergent creation scale,CCU/yr,Supply,1e-06,1000.0,0.1,"Scale factor in g(C,U,L)"
+beta,Elasticity wrt compute C,-,Supply,0.2,2.0,0.8,Power-law exponent
+gamma,Elasticity wrt users U,-,Supply,0.2,2.0,0.6,Power-law exponent
+Csat,Compute saturation level,C units,Supply,1.0,100.0,30.0,In denom cap
+Usat,Users saturation level,U units,Supply,1.0,100.0,50.0,In denom cap
+p,Saturation exponent for C,-,Supply,1.0,3.0,2.0,Cap sharpness
+q,Saturation exponent for U,-,Supply,1.0,3.0,2.0,Cap sharpness
+a,Connectivity gate slope,-,Supply,0.5,5.0,1.5,Logistic slope for L
+L0_pre,Connectivity gate midpoint pre-1990,index-units,Supply,0.5,4.0,2.5,Higher threshold pre-1990
+L0_post,Connectivity gate midpoint post-1990,index-units,Supply,0.1,3.0,1.0,Lower threshold post-1990
+wA,Animal complexity weight per event,CCU/event,Supply,0.05,1.0,0.2,Human=1 normalization
+wP,Plant complexity weight per event,CCU/event,Supply,0.0,0.2,0.02,Physicalist prior -> near zero
+wE,Emergent agent complexity weight per event,CCU/event,Supply,0.1,3.0,0.5,Agentic tools/institutions
+phi_c,Accessible cosmic flux,CCU/yr,Supply,0.0,10.0,0.0,"Start 0, optional later"
+f_addr,Addressable fraction from cosmic flux,fraction,Supply,0.0,1.0,0.0,0 for baseline
+rL,Connectivity drift rate,1/yr,Dynamics,0.01,0.2,0.05,For synthetic generation
+Lmax,Connectivity ceiling,index-units,Dynamics,1.0,10.0,5.0,For synthetic generation
+gC,Compute growth sensitivity to surplus,1/yr,Dynamics,0.0,0.2,0.05,Synthetic only
+gU,Users growth sensitivity to surplus,1/yr,Dynamics,0.0,0.2,0.03,Synthetic only

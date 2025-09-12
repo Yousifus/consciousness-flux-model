@@ -1,0 +1,22 @@
+{
+  "fitted_params": {
+    "alpha": 0.1,
+    "beta": 0.8,
+    "gamma": 0.6
+  },
+  "csr_mean_overall": 0.00033366199912472156,
+  "csr_mean_pre1990": 0.0002973653551647627,
+  "csr_mean_post1990": 0.0003739916035246758,
+  "csr_improvement": 25.7683845912233,
+  "population_growth": 3.5228532306464224,
+  "creators_growth": 6.068663218914023,
+  "network_effects_ok": true,
+  "priors": "IIT",
+  "weights_used": {
+    "wA": 0.4,
+    "wP": 0.2,
+    "wE": 0.3
+  },
+  "fit_source": "synthetic_decomp",
+  "regime_year": 1990
+}

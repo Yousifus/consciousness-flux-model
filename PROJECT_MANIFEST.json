@@ -1,0 +1,118 @@
+{
+  "project": "Consciousness Flux Model (RFE)",
+  "version": "1.0.3",
+  "created": "2025-09-13",
+  "last_updated": "2025-09-13T00:53:00",
+  "description": "Mathematical framework modeling consciousness as energy flowing through cosmic, terrestrial, and emergent sources to meet human demand",
+  "philosophical_question": "Where do new souls come from as the human population grows?",
+  "key_insight": "Digital emergence post-1990 provides additional consciousness supply to maintain abundance",
+  
+  "structure": {
+    "src": {
+      "description": "Source code implementations",
+      "files": [
+        {
+          "name": "consciousness_flux_model_v1.py",
+          "version": "1.0.0",
+          "description": "Main consolidated implementation with versioning support"
+        },
+        {
+          "name": "consciousness_flux_visualization.py",
+          "description": "Advanced visualization generator"
+        },
+        {
+          "name": "run_ccsr_model.py",
+          "description": "Original notebook conversion"
+        },
+        {
+          "name": "analyze_csr.py",
+          "description": "CSR analysis tools"
+        }
+      ]
+    },
+    "data": {
+      "description": "Input data files",
+      "files": [
+        {
+          "name": "ccsr_parameters_template.csv",
+          "description": "Model parameters with priors and bounds"
+        },
+        {
+          "name": "synthetic_ccsr_timeseries.csv",
+          "description": "Synthetic time series data 1950-2025"
+        }
+      ]
+    },
+    "outputs": {
+      "description": "Generated outputs",
+      "subdirs": {
+        "images": "Visualization plots",
+        "notebooks": "Jupyter notebooks",
+        "results": "JSON results and statistics",
+        "archives": "Timestamped backups"
+      }
+    }
+  },
+  
+  "key_results": {
+    "csr_improvement": "30.6%",
+    "population_growth": "3.5x",
+    "digital_creators_growth": "6.1x",
+    "pre_1990_csr": "0.91e-4",
+    "post_1990_csr": "1.19e-4"
+  },
+  
+  "dependencies": {
+    "python": "3.11",
+    "packages": [
+      "numpy",
+      "pandas",
+      "matplotlib"
+    ]
+  },
+  
+  "changelog": [
+    {
+      "version": "1.0.3",
+      "date": "2025-09-13", 
+      "changes": [
+        "Fixed double-counting: Gs excluded from terrestrial supply",
+        "Vectorized gate calculation for robust fitting",
+        "Enhanced uncertainty bands with sharing parameter sampling",
+        "Added network effect invariant check",
+        "Added philosophical priors presets (PHYSICALIST, IIT, PANPSYCHIST)",
+        "Improved plot readability with bottom bounds"
+      ]
+    },
+    {
+      "version": "1.0.2",
+      "date": "2025-09-13",
+      "changes": [
+        "Fixed supply plot to use correct CCU units for emergent consciousness",
+        "Model results now use fitted parameters instead of synthetic CSV",
+        "Added robust parameter fitting with clamping and seeded RNG",
+        "All statistics computed from actual model outputs",
+        "Fixed uncertainty bands generation"
+      ]
+    },
+    {
+      "version": "1.0.1",
+      "date": "2025-09-13",
+      "changes": [
+        "Fixed CSR visualization scale",
+        "Added parameter sanity checks"
+      ]
+    },
+    {
+      "version": "1.0.0",
+      "date": "2025-09-13",
+      "changes": [
+        "Initial project organization",
+        "Consolidated multiple Python implementations",
+        "Added versioning and timestamp support",
+        "Created comprehensive visualizations",
+        "Documented philosophical framework"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "fitted_params": {
+    "alpha": 1.0,
+    "beta": 0.0,
+    "gamma": 0.0
+  },
+  "csr_mean_overall": 0.00016683102366833635,
+  "csr_mean_pre1990": 0.00014868270300509993,
+  "csr_mean_post1990": 0.00018699582440526567,
+  "csr_improvement": 25.768378315567464,
+  "population_growth": 3.5228532306464224,
+  "creators_growth": 6.068663218914023,
+  "network_effects_ok": true
+}

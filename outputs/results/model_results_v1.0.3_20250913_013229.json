@@ -1,0 +1,22 @@
+{
+  "fitted_params": {
+    "alpha": 0.1,
+    "beta": 0.8,
+    "gamma": 0.6
+  },
+  "csr_mean_overall": 0.0007475129945588809,
+  "csr_mean_pre1990": 0.0006676901068652909,
+  "csr_mean_post1990": 0.000836205091996203,
+  "csr_improvement": 25.238502622431497,
+  "population_growth": 3.5228532306464224,
+  "creators_growth": 6.068663218914023,
+  "network_effects_ok": true,
+  "priors": "PHYSICALIST",
+  "weights_used": {
+    "wA": 0.8,
+    "wP": 0.5,
+    "wE": 0.1
+  },
+  "fit_source": "synthetic_decomp",
+  "regime_year": 1990
+}
