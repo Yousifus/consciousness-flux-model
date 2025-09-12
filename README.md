@@ -1,5 +1,12 @@
 # 🌌 Consciousness Flux Model (RFE) 
 
+[![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/Yousifus/consciousness-flux-model/workflows/CI/badge.svg)](https://github.com/Yousifus/consciousness-flux-model/actions)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Documentation Status](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://yousifus.github.io/consciousness-flux-model/)
+[![Research](https://img.shields.io/badge/research-consciousness%20studies-purple.svg)](https://github.com/Yousifus/consciousness-flux-model/discussions)
+
 ## The Reincarnation Flux Equation - A Mathematical Framework for Consciousness Supply & Demand
 
 ### 🌟 Overview
