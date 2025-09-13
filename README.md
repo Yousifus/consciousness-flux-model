@@ -89,6 +89,17 @@ python src/compare_priors.py --priors IIT,PANPSYCHIST --cosmic 0.02 --addr 0.8
 # - outputs/images/csr_by_priors.png
 ```
 
+### Rich drivers, quality & changepoints (optional)
+```bash
+python src/consciousness_flux_model_v1.py --rich --quality --changepoints
+# Regional panel demo:
+python src/consciousness_flux_model_v1.py --rich --regions 3
+# Compare priors (CSV + PNG artifacts):
+python src/compare_priors.py
+```
+
+*Notes:* Rich mode augments the demo with correlated tech/culture drivers, a bounded **quality multiplier** on supply, a light hierarchy sample, and simple changepoint detection on log-CSR.
+
 ### Tests
 
 ```bash

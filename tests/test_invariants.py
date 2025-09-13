@@ -83,3 +83,17 @@ def test_comprehensive_analysis():
     assert "comprehensive_analysis_results" in m.results
     assert "comprehensive_analysis_results_image" in m.results
 
+
+def test_changepoints_and_quality_toggle():
+    from src.consciousness_flux_model_v1 import ConsciousnessFluxModel
+    m = ConsciousnessFluxModel(priors="IIT", enable_rich=True, enable_quality=True, detect_changes=True)
+    m.load_data(); m.run_model()
+    assert "decomposition" in m.results
+    # Rich features should be present
+    if m.enable_rich:
+        assert "hierarchy_weights_sample" in m.results
+    # changepoints optional, but type should be list if requested
+    if m.detect_changes:
+        assert isinstance(m.results.get("changepoints", []), list)
+        assert len(m.results["changepoints"]) > 0  # Should detect some changepoints
+

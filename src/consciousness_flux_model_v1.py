@@ -34,13 +34,21 @@ class ConsciousnessFluxModel:
     human demand through traditional (terrestrial) and emergent (digital/AI) sources.
     """
     
-    def __init__(self, priors="PHYSICALIST", cosmic=None, addr=None, regime_year=1990):
+    def __init__(self, priors="PHYSICALIST", cosmic=None, addr=None, regime_year=1990,
+                 enable_rich=False, n_regions=0, enable_quality=False, detect_changes=False):
         self.priors = priors
         self.cosmic_override = cosmic
         self.addr_override = addr
         self.regime_year = regime_year
-        self.params_file = "../data/ccsr_parameters_template.csv"
-        self.data_file = "../data/synthetic_ccsr_timeseries.csv"
+        self.enable_rich = enable_rich
+        self.n_regions = n_regions
+        self.enable_quality = enable_quality
+        self.detect_changes = detect_changes
+        # Resolve data directory robustly regardless of CWD
+        self.root_dir = Path(__file__).resolve().parent.parent
+        self.data_dir = self.root_dir / 'data'
+        self.params_file = self.data_dir / 'ccsr_parameters_template.csv'
+        self.data_file = self.data_dir / 'synthetic_ccsr_timeseries.csv'
         self.params = {}
         self.gen_weights = {}
         self.data = None
@@ -103,6 +111,14 @@ class ConsciousnessFluxModel:
         
         # Load time series
         self.data = pd.read_csv(self.data_file)
+        
+        # Merge rich drivers when enabled
+        if self.enable_rich:
+            from rich.synthetic_rich_data import rich_synthetic
+            years = self.data["year"].values
+            df_rich = rich_synthetic(years, seed=1337)
+            self.data = self.data.merge(df_rich, on="year", how="left")
+        
         return self.data
 
     def decompose_post_change(self, y0_lo: int = 1985, y0_hi: int = 1989,
@@ -277,10 +293,22 @@ class ConsciousnessFluxModel:
             self.params.update(fitted)
             alpha, beta, gamma = fitted['alpha'], fitted['beta'], fitted['gamma']
         
+        # Cache quality multiplier if rich mode with quality is enabled
+        if self.enable_rich and self.enable_quality:
+            from rich.quality import quality_multiplier
+            self.quality_vector_cached = quality_multiplier(self.data.ffill().bfill())
+        
         # Recompute S, D, CSR for all years using the fitted parameters
         S, D = [], []
-        for _, row in self.data.iterrows():
+        for idx, (_, row) in enumerate(self.data.iterrows()):
             s, d = self.compute_SD(row, alpha, beta, gamma)
+            
+            # Apply quality multiplier to supply when enabled
+            Qs = 1.0
+            if self.enable_rich and self.enable_quality:
+                Qs = float(self.quality_vector_cached[idx])
+            s = s * Qs
+            
             S.append(s)
             D.append(d)
         self.data['S_model'] = np.array(S)
@@ -318,6 +346,46 @@ class ConsciousnessFluxModel:
             'fit_source': 'synthetic_decomp' if 'S_supply' in self.data.columns else 'model_iterative',
             'regime_year': self.regime_year
         }
+        
+        # Add hierarchy sample when rich mode is enabled
+        if self.enable_rich:
+            from rich.hierarchy import dynamic_level_weights
+            sample_year = int(self.data.loc[self.data.index[len(self.data)//2], "year"])
+            self.results["hierarchy_weights_sample"] = dynamic_level_weights(sample_year)
+        
+        # Add changepoint detection when enabled
+        if self.detect_changes:
+            from rich.changepoint import segment_changes
+            x = np.log(np.maximum(self.data["CSR_model"].values, 1e-12))
+            cps = segment_changes(x, max_k=3, min_len=5)
+            years = self.data["year"].values
+            self.results["changepoints"] = [int(years[i]) for i in cps]
+        
+        # Add regional panel when enabled
+        if self.n_regions and self.n_regions == 3:
+            # Split population & drivers into 3 synthetic regions
+            df = self.data.copy()
+            shares = np.array([0.2, 0.6, 0.2])  # developed, developing, frontier
+            regions = ["DEV","DEVG","FRONT"]
+            panel = []
+            for r, sh in zip(regions, shares):
+                sub = df[["year","population","L_index","C_compute","U_creators"]].copy()
+                sub["region"] = r
+                # tweak connectivity per region
+                if r=="DEV":   sub["L_index"] *= 1.1
+                if r=="DEVG":  sub["L_index"] *= 0.9
+                if r=="FRONT": sub["L_index"] *= 0.7
+                # scale pop and creators
+                sub["population"] = sub["population"] * sh
+                sub["U_creators"] = sub["U_creators"] * (0.8 if r!="DEV" else 1.2)
+                panel.append(sub)
+            panel = pd.concat(panel, ignore_index=True)
+            # Save for inspection
+            output_dir = self.root_dir / "outputs" / "results"
+            output_dir.mkdir(parents=True, exist_ok=True)
+            outp = output_dir / "regional_panel.csv"
+            panel.to_csv(outp, index=False)
+            self.results["regional_panel"] = str(outp)
         
         return self.data
     
@@ -511,16 +579,31 @@ def main():
                        help='Philosophical priors: PHYSICALIST, IIT, or PANPSYCHIST')
     parser.add_argument('--cosmic', type=float, default=None, help='Optional phi_c override (CCU/yr, small)')
     parser.add_argument('--addr', type=float, default=None, help='Optional f_addr override (0..1)')
+    parser.add_argument("--rich", action="store_true", help="Enable rich drivers/quality/hierarchy")
+    parser.add_argument("--regions", type=int, default=0, help="Optional number of regions (0, 3 recommended)")
+    parser.add_argument("--quality", action="store_true", help="Apply quality multiplier to supply (Qs)")
+    parser.add_argument("--changepoints", action="store_true", help="Detect changepoints on log-CSR")
     
     args = parser.parse_args()
     
     print("🌌 CONSCIOUSNESS FLUX MODEL - Version 1.0.3")
     print("=" * 50)
     print(f"🧠 Using {args.priors} priors")
+    if args.rich:
+        print("✨ Rich mode enabled: correlated drivers, quality, hierarchy")
+    if args.quality:
+        print("🎯 Quality multiplier enabled")
+    if args.changepoints:
+        print("📈 Changepoint detection enabled")
+    if args.regions:
+        print(f"🌍 Regional analysis enabled: {args.regions} regions")
     
     # Initialize and run model
-    model = ConsciousnessFluxModel(data_dir=args.data_dir, priors=args.priors,
-                                   cosmic=args.cosmic, addr=args.addr)
+    model = ConsciousnessFluxModel(
+        priors=args.priors, cosmic=args.cosmic, addr=args.addr,
+        regime_year=1990, enable_rich=args.rich, n_regions=args.regions,
+        enable_quality=args.quality, detect_changes=args.changepoints
+    )
     
     print("📂 Loading data...")
     model.load_data()
