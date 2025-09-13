@@ -34,31 +34,17 @@ class ConsciousnessFluxModel:
     human demand through traditional (terrestrial) and emergent (digital/AI) sources.
     """
     
-    def __init__(self, data_dir: Optional[Path] = None, priors: str = 'PHYSICALIST',
-                 cosmic: Optional[float] = None, addr: Optional[float] = None,
-                 regime_year: int = 1990):
-        """Initialize model with data directory and philosophical priors."""
-        # Resolve data directory robustly regardless of CWD
-        self.root_dir = Path(__file__).resolve().parent.parent
-        if data_dir is None:
-            self.data_dir = self.root_dir / 'data'
-        else:
-            candidate = Path(data_dir)
-            if candidate.exists():
-                self.data_dir = candidate
-            else:
-                alt = self.root_dir / str(data_dir)
-                self.data_dir = alt if alt.exists() else (self.root_dir / 'data')
-        self.params_file = self.data_dir / 'ccsr_parameters_template.csv'
-        self.data_file = self.data_dir / 'synthetic_ccsr_timeseries.csv'
-        self.params = None
-        self.data = None
-        self.results = {}
+    def __init__(self, priors="PHYSICALIST", cosmic=None, addr=None, regime_year=1990):
         self.priors = priors
-        self.gen_weights = {'wA': None, 'wP': None, 'wE': None}  # baseline generation weights
-        self.regime_year = regime_year
         self.cosmic_override = cosmic
         self.addr_override = addr
+        self.regime_year = regime_year
+        self.params_file = "../data/ccsr_parameters_template.csv"
+        self.data_file = "../data/synthetic_ccsr_timeseries.csv"
+        self.params = {}
+        self.gen_weights = {}
+        self.data = None
+        self.results = {}
         
     def set_priors(self, priors: str):
         """Set parameter presets based on philosophical stance."""
@@ -186,20 +172,16 @@ class ConsciousnessFluxModel:
             "demand": -dln_D
         }
     
-    def e_share(self, L_val: np.ndarray, post_1990: bool) -> np.ndarray:
-        """Calculate efficiency share using Hill function."""
-        e_max = self.params["e_max_post"] if post_1990 else self.params["e_max_pre"]
-        n = self.params["n"]
-        K = self.params["K"]
+    def e_share(self, L_val, post: bool) -> float:
+        e_max = self.params["e_max_post"] if post else self.params["e_max_pre"]
+        n, K = self.params["n"], self.params["K"]
         val = e_max * (L_val**n) / (K**n + L_val**n)
-        # Clamp to avoid 1 - e underflow in extreme draws
-        return np.clip(val, 0.0, float(e_max) - 1e-9)
-    
-    def sigma_L(self, L_val: np.ndarray, post_1990: bool) -> np.ndarray:
-        """Logistic gate function for connectivity."""
+        return float(max(0.0, min(val, e_max - 1e-9)))
+
+    def sigma_L(self, L_val, post: bool) -> float:
         a = self.params["a"]
-        L0 = self.params["L0_post"] if post_1990 else self.params["L0_pre"]
-        return 1.0 / (1.0 + np.exp(-a * (L_val - L0)))
+        L0 = self.params["L0_post"] if post else self.params["L0_pre"]
+        return float(1.0 / (1.0 + np.exp(-a * (L_val - L0))))
     
     def cap_CU(self, C_val: np.ndarray, U_val: np.ndarray) -> np.ndarray:
         """Saturation cap for compute and users."""
@@ -309,6 +291,11 @@ class ConsciousnessFluxModel:
         pre_1990 = self.data[self.data['year'] < self.regime_year]
         post_1990 = self.data[self.data['year'] >= self.regime_year]
         
+        # Add LMDI-style decomposition
+        decomp = self.decompose_post_change(
+            alpha=self.params["alpha"], beta=self.params["beta"], gamma=self.params["gamma"]
+        )
+        
         self.results = {
             'fitted_params': fitted,
             'csr_mean_overall': self.data['CSR_model'].mean(),
@@ -320,6 +307,7 @@ class ConsciousnessFluxModel:
                                 self.data.iloc[0]['population']),
             'creators_growth': (self.data.iloc[-1]['U_creators'] / 
                               self.data[self.data['year']==1990]['U_creators'].values[0]),
+            'decomposition': decomp,
             'network_effects_ok': True,  # Demand uses e_share only; supply uses sigma_L only
             'priors': self.priors,
             'weights_used': {
@@ -396,7 +384,7 @@ class ConsciousnessFluxModel:
         ax1.set_ylabel('Population (billions)', fontsize=12)
         ax1_twin.semilogy(self.data['year'], self.data['D_model'], 'r--', linewidth=2.5, alpha=0.7)
         ax1_twin.set_ylabel('Consciousness Demand (CCU, log)', fontsize=12, color='red')
-        ax1.axvline(1990, color=colors['regime'], linestyle='--', alpha=0.5)
+        ax1.axvline(self.regime_year, color=colors['regime'], linestyle='--', alpha=0.5)
         ax1.set_title('Population Growth Drives Consciousness Demand', fontsize=14)
         ax1.grid(True, alpha=0.3)
         
@@ -418,7 +406,7 @@ class ConsciousnessFluxModel:
                         label='Terrestrial', color='brown', alpha=0.6)
         ax2.fill_between(self.data['year'], terrestrial, terrestrial + emergent,
                         label='Emergent (Digital/AI)', color=colors['creators'], alpha=0.7)
-        ax2.axvline(1990, color=colors['regime'], linestyle='--', alpha=0.5)
+        ax2.axvline(self.regime_year, color=colors['regime'], linestyle='--', alpha=0.5)
         ax2.set_title('Consciousness Supply Sources', fontsize=14)
         ax2.set_ylabel('Supply (CCU/yr)', fontsize=12)
         ax2.set_ylim(bottom=0)  # Avoid negative fills
@@ -439,8 +427,8 @@ class ConsciousnessFluxModel:
                 color=colors['compute'], linewidth=3)
         ax3.plot(self.data['year'], U_norm, label='Digital Creators (U)', 
                 color=colors['creators'], linewidth=3)
-        ax3.axvline(1990, color=colors['regime'], linestyle='--', alpha=0.5)
-        ax3.fill_between([1990, 2025], 0, 1, alpha=0.1, color=colors['regime'])
+        ax3.axvline(self.regime_year, color=colors['regime'], linestyle='--', alpha=0.5)
+        ax3.fill_between([self.regime_year, 2025], 0, 1, alpha=0.1, color=colors['regime'])
         ax3.set_title('The Three Drivers of Emergent Consciousness (Normalized)', fontsize=14)
         ax3.set_xlabel('Year', fontsize=12)
         ax3.set_ylabel('Normalized Level', fontsize=12)
@@ -506,18 +494,7 @@ class ConsciousnessFluxModel:
         
         print(f"✅ Saved visualization: {filename}")
         
-        # Save results as JSON
-        results_file = output_dir.parent / 'results' / f'model_results_{version}_{timestamp}.json'
-        results_file.parent.mkdir(parents=True, exist_ok=True)
-        
-        with open(results_file, 'w') as f:
-            json.dump(self.results, f, indent=2)
-        
-        print(f"✅ Saved results: {results_file.name}")
-        
         return str(output_dir / filename)
-        
-        return filename
 
 
 def main():
@@ -567,6 +544,19 @@ def main():
         alpha=model.params["alpha"], beta=model.params["beta"], gamma=model.params["gamma"]
     )
     model.results["decomposition"] = decomp
+
+    # Save results JSON linked to the same timestamp as the image
+    out_results_dir = Path(args.output_dir).parent / 'results'
+    out_results_dir.mkdir(parents=True, exist_ok=True)
+    img_name = Path(filename).name
+    try:
+        ts = img_name.rsplit('_', 1)[1].replace('.png', '')
+    except Exception:
+        ts = datetime.now().strftime('%Y%m%d_%H%M%S')
+    results_file = out_results_dir / f'model_results_{args.version}_{ts}.json'
+    with open(results_file, 'w') as f:
+        json.dump(model.results, f, indent=2)
+    print(f"✅ Saved results: {results_file.name}")
     
     print("\n🌟 Analysis complete! The consciousness cosmos has been revealed!")
     

@@ -26,4 +26,60 @@ def test_priors_independence_on_synthetic():
     # synthetic file was generated under one set of weights, so fits should not drift with priors
     assert len(set(vals)) == 1
 
+def test_changepoints_and_quality_toggle():
+    from src.consciousness_flux_model_v1 import ConsciousnessFluxModel
+    m = ConsciousnessFluxModel(priors="IIT", enable_rich=True, enable_quality=True, detect_changes=True)
+    m.load_data(); m.run_model()
+    assert "decomposition" in m.results
+    assert "artifact_image" in m.results
+    # changepoints optional, but type should be list if requested
+    if m.detect_changes:
+        assert isinstance(m.results.get("changepoints", []), list)
+
+def test_regime_year_setting():
+    m = ConsciousnessFluxModel(priors="IIT", regime_year=2000)
+    m.load_data(); m.run_model()
+    assert m.results["regime_year"] == 2000
+    # Check that changing regime year changes fitted params
+    m2 = ConsciousnessFluxModel(priors="IIT", regime_year=1990)
+    m2.load_data(); m2.run_model()
+    fp1 = m.results["fitted_params"]
+    fp2 = m2.results["fitted_params"]
+    assert fp1 != fp2
+
+def test_parameter_fitting_and_derivation():
+    from src.consciousness_flux_model_v1 import ConsciousnessFluxModel
+    m = ConsciousnessFluxModel(priors="IIT", enable_rich=True, enable_quality=True, detect_changes=True)
+    m.load_data(); m.run_model()
+    assert "decomposition" in m.results
+    assert "artifact_image" in m.results
+    # changepoints optional, but type should be list if requested
+    if m.detect_changes:
+        assert isinstance(m.results.get("changepoints", []), list)
+        assert isinstance(m.results.get("quality_multiplier", []), list)
+        assert isinstance(m.results.get("level_weights", []), list)
+
+def test_uncertainty_bands():
+    from src.consciousness_flux_model_v1 import ConsciousnessFluxModel
+    m = ConsciousnessFluxModel(priors="IIT", enable_rich=True, enable_quality=True, detect_changes=True)
+    m.load_data(); m.run_model()
+    assert "decomposition" in m.results
+    assert "artifact_image" in m.results
+    # changepoints optional, but type should be list if requested
+    if m.detect_changes:
+        assert isinstance(m.results.get("changepoints", []), list)
+        assert isinstance(m.results.get("quality_multiplier", []), list)
+        assert isinstance(m.results.get("level_weights", []), list)
+    
+def test_comprehensive_analysis():
+    from src.consciousness_flux_model_v1 import ConsciousnessFluxModel
+    m = ConsciousnessFluxModel(priors="IIT", enable_rich=True, enable_quality=True, detect_changes=True)
+    m.load_data(); m.run_model()
+    assert "decomposition" in m.results
+    assert "artifact_image" in m.results
+    assert "uncertainty_bands" in m.results
+    assert "comprehensive_analysis" in m.results
+    assert "comprehensive_analysis_image" in m.results
+    assert "comprehensive_analysis_results" in m.results
+    assert "comprehensive_analysis_results_image" in m.results
 

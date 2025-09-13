@@ -37,12 +37,25 @@ jobs:
       run: |
         pytest tests/ -v --cov=src --cov-report=xml --cov-report=html
     
+    - name: Compare priors overlay
+      run: |
+        python src/compare_priors.py
+    
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
         file: ./coverage.xml
         flags: unittests
         name: codecov-umbrella
+
+    - name: Upload model artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: model-artifacts-${{ matrix.python-version }}
+        path: |
+          outputs/results/*.json
+          outputs/results/*.csv
+          outputs/images/*.png
 
   build:
     needs: test

@@ -28,6 +28,8 @@ Our analysis of synthetic data (1950-2025) reveals:
 
 **✨ The cosmos ensures consciousness abundance through emergence!**
 
+*All percentage figures shown in README are from **Synthetic Scenario A** (the included demo dataset).* 
+
 ### 📁 Project Structure
 
 ```
@@ -82,6 +84,9 @@ python consciousness_flux_visualization.py
 ```bash
 python src/compare_priors.py
 python src/compare_priors.py --priors IIT,PANPSYCHIST --cosmic 0.02 --addr 0.8
+# artifacts:
+# - outputs/results/csr_by_priors.csv
+# - outputs/images/csr_by_priors.png
 ```
 
 ### Tests

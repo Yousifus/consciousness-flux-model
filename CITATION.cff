@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Consciousness Flux Model (CSR)"
+authors:
+  - family-names: Awlaki
+    given-names: Yousef
+version: "1.0.3"
+date-released: 2025-09-13
+license: MIT
+repository-code: "https://github.com/Yousifus/consciousness-flux-model"
+
+
